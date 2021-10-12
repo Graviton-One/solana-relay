@@ -1,5 +1,85 @@
 import { cloneDeep } from 'lodash-es'
+import {TokenAmount} from "./constants"
 
+export function getSwapOutAmount(
+    poolInfo,
+    fromCoinMint,
+    toCoinMint,
+    amount,
+    slippage
+  ) {
+    const { coin, pc, fees } = poolInfo
+    const { swapFeeNumerator, swapFeeDenominator } = fees
+  
+    if (fromCoinMint === coin.mintAddress && toCoinMint === pc.mintAddress) {
+      // coin2pc
+      const fromAmount = new TokenAmount(amount, coin.decimals, false)
+      const fromAmountWithFee = fromAmount.wei
+        .multipliedBy(swapFeeDenominator - swapFeeNumerator)
+        .dividedBy(swapFeeDenominator)
+  
+      const denominator = coin.balance.wei.plus(fromAmountWithFee)
+      const amountOut = pc.balance.wei.multipliedBy(fromAmountWithFee).dividedBy(denominator)
+      const amountOutWithSlippage = amountOut.dividedBy(1 + slippage / 100)
+  
+      const outBalance = pc.balance.wei.minus(amountOut)
+      const beforePrice = new TokenAmount(
+        parseFloat(new TokenAmount(pc.balance.wei, pc.decimals).fixed()) /
+          parseFloat(new TokenAmount(coin.balance.wei, coin.decimals).fixed()),
+        pc.decimals,
+        false
+      )
+      const afterPrice = new TokenAmount(
+        parseFloat(new TokenAmount(outBalance, pc.decimals).fixed()) /
+          parseFloat(new TokenAmount(denominator, coin.decimals).fixed()),
+        pc.decimals,
+        false
+      )
+      const priceImpact =
+        ((parseFloat(beforePrice.fixed()) - parseFloat(afterPrice.fixed())) / parseFloat(beforePrice.fixed())) * 100
+  
+      return {
+        amountIn: fromAmount,
+        amountOut: new TokenAmount(amountOut, pc.decimals),
+        amountOutWithSlippage: new TokenAmount(amountOutWithSlippage, pc.decimals),
+        priceImpact
+      }
+    } else {
+      // pc2coin
+      const fromAmount = new TokenAmount(amount, pc.decimals, false)
+      const fromAmountWithFee = fromAmount.wei
+        .multipliedBy(swapFeeDenominator - swapFeeNumerator)
+        .dividedBy(swapFeeDenominator)
+  
+      const denominator = pc.balance.wei.plus(fromAmountWithFee)
+      const amountOut = coin.balance.wei.multipliedBy(fromAmountWithFee).dividedBy(denominator)
+      const amountOutWithSlippage = amountOut.dividedBy(1 + slippage / 100)
+  
+      const outBalance = coin.balance.wei.minus(amountOut)
+  
+      const beforePrice = new TokenAmount(
+        parseFloat(new TokenAmount(pc.balance.wei, pc.decimals).fixed()) /
+          parseFloat(new TokenAmount(coin.balance.wei, coin.decimals).fixed()),
+        pc.decimals,
+        false
+      )
+      const afterPrice = new TokenAmount(
+        parseFloat(new TokenAmount(denominator, pc.decimals).fixed()) /
+          parseFloat(new TokenAmount(outBalance, coin.decimals).fixed()),
+        pc.decimals,
+        false
+      )
+      const priceImpact =
+        ((parseFloat(afterPrice.fixed()) - parseFloat(beforePrice.fixed())) / parseFloat(beforePrice.fixed())) * 100
+  
+      return {
+        amountIn: fromAmount,
+        amountOut: new TokenAmount(amountOut, coin.decimals),
+        amountOutWithSlippage: new TokenAmount(amountOutWithSlippage, coin.decimals),
+        priceImpact
+      }
+    }
+  }
 
 export const NATIVE_SOL = {
     symbol: 'SOL',
