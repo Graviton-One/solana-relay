@@ -1,0 +1,13 @@
+[provider]
+cluster = "Mainnet"
+#cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[programs.localnet]
+relay_port = "2d2wEgqzGP57pzxJHgXywYK7psrBg3LL5xAzqxPnhcUn"
+
+#[[test.genesis]]
+#address = "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"
+
+[scripts]
+test = "mocha -t 1000000 tests/"

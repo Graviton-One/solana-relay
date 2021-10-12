@@ -1,0 +1,32 @@
+{
+  "dependencies": {
+    "@project-serum/anchor": "0.13.2",
+    "@project-serum/common": "0.0.1-beta.3",
+    "@project-serum/serum": "^0.13.60",
+    "@solana/spl-token": "^0.1.8",
+    "@solana/web3.js": "^1.29.2",
+    "bignumber.js": "^9.0.1",
+    "debug": "^4.3.2",
+    "stable": "^0.1.8"
+  },
+  "name": "solana_relay",
+  "version": "1.0.0",
+  "main": "client.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/relay.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Graviton-One/solana-sc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Graviton-One/solana-sc/issues"
+  },
+  "homepage": "https://github.com/Graviton-One/solana-sc#readme",
+  "description": ""
+}
