@@ -1,12 +1,13 @@
 {
   "dependencies": {
-    "@project-serum/anchor": "0.13.2",
+    "@project-serum/anchor": "^0.13.2",
     "@project-serum/common": "0.0.1-beta.3",
     "@project-serum/serum": "^0.13.60",
     "@solana/spl-token": "^0.1.8",
     "@solana/web3.js": "^1.29.2",
     "bignumber.js": "^9.0.1",
     "debug": "^4.3.2",
+    "lodash-es": "^4.17.21",
     "stable": "^0.1.8"
   },
   "name": "solana_relay",
