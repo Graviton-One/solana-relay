@@ -1,7 +1,16 @@
-import BigNumber from 'bignumber.js'
-import { LP_TOKENS, NATIVE_SOL, TOKENS } from './tokens'
+const { LP_TOKENS, NATIVE_SOL, TOKENS } = require('./tokens.js')
 
-export function getAddressForWhat(address) {
+
+ const LIQUIDITY_POOL_PROGRAM_ID_V2 = 'RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr'
+ const LIQUIDITY_POOL_PROGRAM_ID_V3 = '27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv'
+ const LIQUIDITY_POOL_PROGRAM_ID_V4 = '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8'
+
+
+ const SERUM_PROGRAM_ID_V2 = 'EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o'
+ const SERUM_PROGRAM_ID_V3 = '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin'
+
+
+ function getAddressForWhat(address) {
   for (const pool of LIQUIDITY_POOLS) {
     for (const [key, value] of Object.entries(pool)) {
       if (key === 'lp') {
@@ -17,46 +26,7 @@ export function getAddressForWhat(address) {
   return {}
 }
 
-export class TokenAmount {
-  wei
-
-  decimals
-  _decimals
-
-  constructor(wei, decimals = 0, isWei = true) {
-    this.decimals = decimals
-    this._decimals = new BigNumber(10).exponentiatedBy(decimals)
-
-    if (isWei) {
-      this.wei = new BigNumber(wei)
-    } else {
-      this.wei = new BigNumber(wei).multipliedBy(this._decimals)
-    }
-  }
-
-  toEther() {
-    return this.wei.dividedBy(this._decimals)
-  }
-
-  toWei() {
-    return this.wei
-  }
-
-  format() {
-    const vaule = this.wei.dividedBy(this._decimals)
-    return vaule.toFormat(vaule.isInteger() ? 0 : this.decimals)
-  }
-
-  fixed() {
-    return this.wei.dividedBy(this._decimals).toFixed(this.decimals)
-  }
-
-  isNullOrZero() {
-    return this.wei.isNaN() || this.wei.isZero()
-  }
-}
-
-export const LIQUIDITY_POOLS = [
+ const LIQUIDITY_POOLS = [
   {
     name: 'RAY-WUSDT',
     coin: { ...TOKENS.RAY },
@@ -2637,3 +2607,8 @@ export const LIQUIDITY_POOLS = [
     official: true
   }
 ]
+
+module.exports = {
+  LIQUIDITY_POOLS,
+  getAddressForWhat
+}

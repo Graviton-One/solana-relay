@@ -1,23 +1,22 @@
-import {
-  Account, AccountInfo, Commitment, Connection, PublicKey, SystemProgram, Transaction,
-  TransactionInstruction, TransactionSignature
-} from '@solana/web3.js';
+const {
+  PublicKey
+} = require('@solana/web3.js');
 
-export const commitment = 'confirmed'
+ const commitment = 'confirmed'
 
-export async function createAmmAuthority(programId) {
+ async function createAmmAuthority(programId) {
   return await findProgramAddress(
     [new Uint8Array(Buffer.from('amm authority'.replace('\u00A0', ' '), 'utf-8'))],
     programId
   )
 }
 
-export async function findProgramAddress(seeds, programId) {
+ async function findProgramAddress(seeds, programId) {
   const [publicKey, nonce] = await PublicKey.findProgramAddress(seeds, programId)
   return { publicKey, nonce }
 }
 
-export async function getFilteredProgramAccountsAmmOrMarketCache(
+ async function getFilteredProgramAccountsAmmOrMarketCache(
   cacheName,
   connection,
   programId,
@@ -47,7 +46,7 @@ export async function getFilteredProgramAccountsAmmOrMarketCache(
   }
 }
 
-export async function getFilteredProgramAccounts(
+ async function getFilteredProgramAccounts(
   connection,
   programId,
   filters
@@ -78,7 +77,7 @@ export async function getFilteredProgramAccounts(
 
 
 // getMultipleAccounts
-export async function getMultipleAccounts(
+ async function getMultipleAccounts(
   connection,
   publicKeys,
   commitment = null
@@ -125,4 +124,13 @@ export async function getMultipleAccounts(
       account
     }
   })
+}
+
+module.exports = {
+  getMultipleAccounts,
+  getFilteredProgramAccounts,
+  getFilteredProgramAccountsAmmOrMarketCache,
+  findProgramAddress,
+  createAmmAuthority,
+  commitment
 }

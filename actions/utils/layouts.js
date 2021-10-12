@@ -1,11 +1,11 @@
-import { bool, publicKey, struct, u32, u64, u128, u8 } from "@project-serum/borsh";
-import { PublicKey } from "@solana/web3.js";
-import { LP_TOKENS} from './tokens';
-import {
+const { bool, publicKey, struct, u32, u64, u128, u8 } = require("@project-serum/borsh");
+const { PublicKey } = require("@solana/web3.js");
+const { LP_TOKENS} = require('./tokens.js');
+const {
   commitment, getMultipleAccounts, 
-} from './web3.js';
+} = require('./web3.js');
 
-export const MINT_LAYOUT = struct([
+ const MINT_LAYOUT = struct([
   u32("mintAuthorityOption"),
   publicKey("mintAuthority"),
   u64("supply"),
@@ -15,7 +15,7 @@ export const MINT_LAYOUT = struct([
   publicKey("freezeAuthority"),
 ]);
 
-export const AMM_INFO_LAYOUT = struct([
+ const AMM_INFO_LAYOUT = struct([
   u64("status"),
   u64("nonce"),
   u64("orderNum"),
@@ -54,7 +54,7 @@ export const AMM_INFO_LAYOUT = struct([
   publicKey("pnlOwner"),
 ]);
 
-export const AMM_INFO_LAYOUT_V3 = struct([
+ const AMM_INFO_LAYOUT_V3 = struct([
   u64("status"),
   u64("nonce"),
   u64("orderNum"),
@@ -97,7 +97,7 @@ export const AMM_INFO_LAYOUT_V3 = struct([
   publicKey("srmTokenAccount"),
 ]);
 
-export const AMM_INFO_LAYOUT_V4 = struct([
+ const AMM_INFO_LAYOUT_V4 = struct([
   u64("status"),
   u64("nonce"),
   u64("orderNum"),
@@ -152,7 +152,7 @@ export const AMM_INFO_LAYOUT_V4 = struct([
   publicKey("pnlOwner"),
 ]);
 
-export async function getLpMintListDecimals(conn, mintAddressInfos) {
+ async function getLpMintListDecimals(conn, mintAddressInfos) {
   const reLpInfoDict = {};
   const mintList = [];
   mintAddressInfos.forEach((item) => {
@@ -187,11 +187,11 @@ export async function getLpMintListDecimals(conn, mintAddressInfos) {
   return reInfo;
 }
 
-export function getBigNumber(num) {
+ function getBigNumber(num) {
   return num === undefined || num === null ? 0 : parseFloat(num.toString());
 }
 
-export const ACCOUNT_LAYOUT = struct([
+ const ACCOUNT_LAYOUT = struct([
   publicKey("mint"),
   publicKey("owner"),
   u64("amount"),
@@ -204,3 +204,13 @@ export const ACCOUNT_LAYOUT = struct([
   u32("closeAuthorityOption"),
   publicKey("closeAuthority"),
 ]);
+
+module.exports = {
+  ACCOUNT_LAYOUT,
+  getBigNumber,
+  getLpMintListDecimals,
+  AMM_INFO_LAYOUT_V4,
+  AMM_INFO_LAYOUT_V3,
+  AMM_INFO_LAYOUT,
+  MINT_LAYOUT
+}

@@ -1,7 +1,46 @@
-import { cloneDeep } from 'lodash-es'
-import {TokenAmount} from "./constants"
+const _ = require('lodash')
+const BigNumber = require('bignumber.js')
 
-export function getSwapOutAmount(
+class TokenAmount {
+  wei
+
+  decimals
+  _decimals
+
+  constructor(wei, decimals = 0, isWei = true) {
+    this.decimals = decimals
+    this._decimals = new BigNumber(10).exponentiatedBy(decimals)
+
+    if (isWei) {
+      this.wei = new BigNumber(wei)
+    } else {
+      this.wei = new BigNumber(wei).multipliedBy(this._decimals)
+    }
+  }
+
+  toEther() {
+    return this.wei.dividedBy(this._decimals)
+  }
+
+  toWei() {
+    return this.wei
+  }
+
+  format() {
+    const vaule = this.wei.dividedBy(this._decimals)
+    return vaule.toFormat(vaule.isInteger() ? 0 : this.decimals)
+  }
+
+  fixed() {
+    return this.wei.dividedBy(this._decimals).toFixed(this.decimals)
+  }
+
+  isNullOrZero() {
+    return this.wei.isNaN() || this.wei.isZero()
+  }
+}
+
+ function getSwapOutAmount(
     poolInfo,
     fromCoinMint,
     toCoinMint,
@@ -81,7 +120,7 @@ export function getSwapOutAmount(
     }
   }
 
-export const NATIVE_SOL = {
+ const NATIVE_SOL = {
     symbol: 'SOL',
     name: 'Native Solana',
     mintAddress: '11111111111111111111111111111111',
@@ -89,15 +128,15 @@ export const NATIVE_SOL = {
     tags: ['raydium']
   }
   
-  export function getTokenByMintAddress(mintAddress) {
+   function getTokenByMintAddress(mintAddress) {
     if (mintAddress === NATIVE_SOL.mintAddress) {
-      return cloneDeep(NATIVE_SOL)
+      return _.cloneDeep(NATIVE_SOL)
     }
     const token = Object.values(TOKENS).find((item) => item.mintAddress === mintAddress)
-    return token ? cloneDeep(token) : null
+    return token ? _.cloneDeep(token) : null
   }
 
-  export const TOKENS = {
+   const TOKENS = {
     WSOL: {
       symbol: 'WSOL',
       name: 'Wrapped Solana',
@@ -742,7 +781,7 @@ export const NATIVE_SOL = {
     }
   }
 
-export const LP_TOKENS = {
+ const LP_TOKENS = {
     'RAY-WUSDT': {
       symbol: 'RAY-WUSDT',
       name: 'RAY-WUSDT V2 LP',
@@ -1564,4 +1603,13 @@ export const LP_TOKENS = {
       mintAddress: '4yykyPugitUVRewNPXXCviRvxGfsfsRMoP32z3b6FmUC',
       decimals: TOKENS.WAG.decimals
     }
+  }
+
+  module.exports = {
+    getSwapOutAmount,
+    NATIVE_SOL,
+    getTokenByMintAddress,
+    TOKENS,
+    LP_TOKENS,
+    TokenAmount,
   }

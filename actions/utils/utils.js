@@ -1,26 +1,27 @@
-import { cloneDeep } from 'lodash-es'
-import { Token, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { closeAccount } from '@project-serum/serum/lib/token-instructions'
-
-import { OpenOrders } from '@project-serum/serum'
-import { MARKET_STATE_LAYOUT_V2 } from '@project-serum/serum/lib/market'
+const { cloneDeep } = require('lodash')
+const { nu64, struct, u8 } = require('buffer-layout');
+const { Token, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } = require('@solana/spl-token');
+const { closeAccount, initializeAccount } = require('@project-serum/serum/lib/token-instructions.js')
+const anchor = require("@project-serum/anchor")
+const { OpenOrders } = require('@project-serum/serum')
+const { MARKET_STATE_LAYOUT_V2 } = require('@project-serum/serum/lib/market.js')
 // eslint-disable-next-line import/named
-import { PublicKey, Transaction, SystemProgram } from '@solana/web3.js'
-import { ACCOUNT_LAYOUT, getBigNumber, MINT_LAYOUT, AMM_INFO_LAYOUT, AMM_INFO_LAYOUT_V3, AMM_INFO_LAYOUT_V4, getLpMintListDecimals } from './layouts'
-import { getAddressForWhat, LIQUIDITY_POOLS } from './constants'
-import { LP_TOKENS, NATIVE_SOL, TOKENS, getTokenByMintAddress } from './tokens'
-import {
+const { Account, PublicKey, Transaction, SystemProgram, TransactionInstruction } = require('@solana/web3.js')
+const { ACCOUNT_LAYOUT, getBigNumber, MINT_LAYOUT, AMM_INFO_LAYOUT, AMM_INFO_LAYOUT_V3, AMM_INFO_LAYOUT_V4, getLpMintListDecimals } = require('./layouts.js')
+const { getAddressForWhat, LIQUIDITY_POOLS } = require('./constants.js')
+const { LP_TOKENS, NATIVE_SOL, TOKENS, getTokenByMintAddress } = require('./tokens.js')
+const {
   commitment,
   createAmmAuthority,
   getFilteredProgramAccountsAmmOrMarketCache,
   getMultipleAccounts
-} from './web3.js'
-import {TokenAmount} from "./constants"
+} = require('./web3.js')
+const {TokenAmount} = require("./tokens.js")
 
-export const LIQUIDITY_POOL_PROGRAM_ID_V4 = '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8'
-export const SERUM_PROGRAM_ID_V3 = '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin'
+ const LIQUIDITY_POOL_PROGRAM_ID_V4 = '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8'
+ const SERUM_PROGRAM_ID_V3 = '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin'
 
-export async function requestInfos(conn) {
+ async function requestInfos(conn) {
 
     let ammAll = []
     let marketAll = []
@@ -286,7 +287,7 @@ export async function requestInfos(conn) {
     return liquidityPools
   }
 
-  export async function swap(
+   async function swap(
     connection,
     wallet,
     poolInfo,
@@ -299,6 +300,7 @@ export async function requestInfos(conn) {
   ) {
     const transaction = new Transaction()
     const signers = []
+    signers.push(wallet)
     const owner = wallet.publicKey
     const from = getTokenByMintAddress(fromCoinMint)
     const to = getTokenByMintAddress(toCoinMint)
@@ -402,7 +404,77 @@ export async function requestInfos(conn) {
     // return await sendTransaction(connection, wallet, transaction, signers)
   }
 
-  export async function createTokenAccountIfNotExist(
+  function swapInstruction(
+    programId,
+    // tokenProgramId: PublicKey,
+    // amm
+    ammId,
+    ammAuthority,
+    ammOpenOrders,
+    ammTargetOrders,
+    poolCoinTokenAccount,
+    poolPcTokenAccount,
+    // serum
+    serumProgramId,
+    serumMarket,
+    serumBids,
+    serumAsks,
+    serumEventQueue,
+    serumCoinVaultAccount,
+    serumPcVaultAccount,
+    serumVaultSigner,
+    // user
+    userSourceTokenAccount,
+    userDestTokenAccount,
+    userOwner,
+  
+    amountIn,
+    minAmountOut
+  ) {
+    const dataLayout = struct([u8('instruction'), nu64('amountIn'), nu64('minAmountOut')])
+  
+    const keys = [
+      // spl token
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      // amm
+      { pubkey: ammId, isSigner: false, isWritable: true },
+      { pubkey: ammAuthority, isSigner: false, isWritable: false },
+      { pubkey: ammOpenOrders, isSigner: false, isWritable: true },
+      { pubkey: ammTargetOrders, isSigner: false, isWritable: true },
+      { pubkey: poolCoinTokenAccount, isSigner: false, isWritable: true },
+      { pubkey: poolPcTokenAccount, isSigner: false, isWritable: true },
+      // serum
+      { pubkey: serumProgramId, isSigner: false, isWritable: false },
+      { pubkey: serumMarket, isSigner: false, isWritable: true },
+      { pubkey: serumBids, isSigner: false, isWritable: true },
+      { pubkey: serumAsks, isSigner: false, isWritable: true },
+      { pubkey: serumEventQueue, isSigner: false, isWritable: true },
+      { pubkey: serumCoinVaultAccount, isSigner: false, isWritable: true },
+      { pubkey: serumPcVaultAccount, isSigner: false, isWritable: true },
+      { pubkey: serumVaultSigner, isSigner: false, isWritable: false },
+      { pubkey: userSourceTokenAccount, isSigner: false, isWritable: true },
+      { pubkey: userDestTokenAccount, isSigner: false, isWritable: true },
+      { pubkey: userOwner, isSigner: true, isWritable: false }
+    ]
+  
+    const data = Buffer.alloc(dataLayout.span)
+    dataLayout.encode(
+      {
+        instruction: 9,
+        amountIn,
+        minAmountOut
+      },
+      data
+    )
+  
+    return new TransactionInstruction({
+      keys,
+      programId,
+      data
+    })
+  }
+
+   async function createTokenAccountIfNotExist(
     connection,
     account,
     owner,
@@ -440,7 +512,7 @@ export async function requestInfos(conn) {
     return publicKey
   }
 
-  export async function createProgramAccountIfNotExist(
+   async function createProgramAccountIfNotExist(
     connection,
     account,
     owner,
@@ -475,7 +547,7 @@ export async function requestInfos(conn) {
     return publicKey
   }
 
-  export async function createAssociatedTokenAccountIfNotExist(
+   async function createAssociatedTokenAccountIfNotExist(
     account,
     owner,
     mintAddress,
@@ -513,7 +585,7 @@ export async function requestInfos(conn) {
     return ata
   }
   /** Function to send transaction via browser extension */
-  export async function sendTransaction(
+   async function sendTransaction(
     connection,
     wallet,
     transaction,
@@ -526,4 +598,67 @@ export async function requestInfos(conn) {
     })
   
     return txid
+  }
+
+  function walletFromRaw() {
+    return anchor.Wallet.local();
+  }
+
+  async function getTokenAccounts(conn, user) {
+    const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
+    const parsedTokenAccounts = await conn.getParsedTokenAccountsByOwner(
+      user,
+      {
+        programId: TOKEN_PROGRAM_ID
+      },
+      'confirmed'
+    );
+    const tokenAccounts = {}
+    const auxiliaryTokenAccounts = []
+  
+    for (const tokenAccountInfo of parsedTokenAccounts.value) {
+      const tokenAccountPubkey = tokenAccountInfo.pubkey
+      const tokenAccountAddress = tokenAccountPubkey.toBase58()
+      const parsedInfo = tokenAccountInfo.account.data.parsed.info
+      const mintAddress = parsedInfo.mint
+      const balance = new TokenAmount(parsedInfo.tokenAmount.amount, parsedInfo.tokenAmount.decimals)
+  
+      const ata = await findAssociatedTokenAddress(user, new PublicKey(mintAddress))
+  
+      if (ata.equals(tokenAccountPubkey)) {
+        tokenAccounts[mintAddress] = {
+           tokenAccountAddress,
+          balance
+        }
+      } else if (parsedInfo.tokenAmount.uiAmount > 0) {
+        auxiliaryTokenAccounts.push(tokenAccountInfo)
+      }
+    }
+  
+    const solBalance = await conn.getBalance(user, 'confirmed')
+    tokenAccounts[NATIVE_SOL.mintAddress] = {
+      tokenAccountAddress: user.toBase58(),
+      balance: new TokenAmount(solBalance, NATIVE_SOL.decimals)
+    }
+    return {auxiliaryTokenAccounts, tokenAccounts}
+  
+  }
+  
+    async function findAssociatedTokenAddress(walletAddress, tokenMintAddress) {
+    const { publicKey } = await findProgramAddress(
+      [walletAddress.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), tokenMintAddress.toBuffer()],
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    )
+    return publicKey
+  }
+  async function findProgramAddress(seeds, programId) {
+    const [publicKey, nonce] = await PublicKey.findProgramAddress(seeds, programId)
+    return { publicKey, nonce }
+  }
+
+  module.exports = {
+    requestInfos,
+    swap,
+    walletFromRaw,
+    getTokenAccounts
   }
