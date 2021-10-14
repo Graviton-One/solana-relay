@@ -13,6 +13,7 @@ const baseMint = "11111111111111111111111111111111"; // from token address in st
 const quoteMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // = to token address in string representattion
 const fromCoinAmount = "10000"; // string amount with all decimals (6 default)
 const baseUrl = process.env.EXTRACTOR_URL;
+console.log(baseUrl);
 
 
 const createWeb3Instance = (endpoint) => {
