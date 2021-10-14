@@ -36,7 +36,7 @@ async function main() {
 
     let userEventDataAccount = anchor.web3.Keypair.generate();
     let external_to = new Array(64).fill(0);
-    let destChain = new Array(3).fill(0);
+    let destChain = [0,0,1];
 
     const acoc = await findAssociatedTokenAddress(me.publicKey,GtonTokenMint);
     console.log(acoc);
