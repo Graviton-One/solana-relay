@@ -399,10 +399,6 @@ const {TokenAmount} = require("./tokens.js")
     }
     const provider = anchor.Provider.local("https://solana-api.projectserum.com")
     return await provider.send(transaction, signers)
-    // await wallet.signTransaction(transaction)
-    // probably we need to add our address as signers
-    return await connection.sendTransaction(transaction, signers)
-    // return await sendTransaction(connection, wallet, transaction, signers)
   }
 
   function swapInstruction(
@@ -657,7 +653,7 @@ const {TokenAmount} = require("./tokens.js")
     return { publicKey, nonce }
   }
 
-  async function transfer(connection, from, addressTo, amountInWei) {
+  async function transfer(from, addressTo, amountInWei) {
     var transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: from.publicKey,
@@ -666,19 +662,15 @@ const {TokenAmount} = require("./tokens.js")
       }),
     );
   
-    // Sign transaction, broadcast, and confirm
-    var signature = await sendAndConfirmTransaction(
-      connection,
-      transaction,
-      [from],
-    );
+    const provider = anchor.Provider.local("https://solana-api.projectserum.com")
     console.log('SIGNATURE', signature);
-    return signature;
+    return await provider.send(transaction)
   }
 
   module.exports = {
     requestInfos,
     swap,
     walletFromRaw,
+    transfer,
     getTokenAccounts,
   }
