@@ -680,5 +680,5 @@ const {TokenAmount} = require("./tokens.js")
     requestInfos,
     swap,
     walletFromRaw,
-    getTokenAccounts
+    getTokenAccounts,
   }
