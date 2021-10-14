@@ -1,4 +1,5 @@
-const { Connection } = require('@solana/web3.js')
+const { Connection, PublicKey } = require('@solana/web3.js')
+const { get } = require('lodash')
 const anchor = require("@project-serum/anchor")
 const { requestInfos, swap, walletFromRaw, getTokenAccounts } = require("./utils/utils.js");
 const { getSwapOutAmount } = require("./utils/tokens.js");
@@ -9,7 +10,7 @@ const ammId = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
 
 const baseMint = "11111111111111111111111111111111"; // from token address in string representattion
 const quoteMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // = to token address in string representattion
-const fromCoinAmount = "10000"; // string amount with all decimals (6 default)
+const fromCoinAmount = "14.0000"; // string amount with all decimals (6 default)
 
 const createWeb3Instance = (endpoint) => {
   const web3 = new Connection(endpoint, commitment);
@@ -25,13 +26,16 @@ async function main() {
   const poolInfo = Object.values(infos).find((p) => p.ammId === ammId);
   const data = await getTokenAccounts(connection, owner.publicKey)
 
-  const baseAccount = data[baseMint]; // from token user account
-  const quoteAccount = data[quoteMint]; // to token user account
+  const baseAccount = get(data.tokenAccounts, `${baseMint}.tokenAccountAddress`); // from token user account
+  const quoteAccount = get(data.tokenAccounts,  `${quoteMint}.tokenAccountAddress`); // to token user account
+
+  console.log(data[quoteMint])
+  console.log(quoteAccount)
 
   const toCoinWithSlippage = getSwapOutAmount(
     poolInfo,
-    baseMint,
     quoteMint,
+    baseMint,
     fromCoinAmount,
     "0.5"
   )
@@ -40,10 +44,10 @@ async function main() {
     connection,
     owner,
     poolInfo,
-    baseMint,
     quoteMint,
-    baseAccount,
+    baseMint,
     quoteAccount,
+    baseAccount,
     fromCoinAmount,
     toCoinWithSlippage
   );

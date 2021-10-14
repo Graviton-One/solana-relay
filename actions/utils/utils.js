@@ -6,7 +6,7 @@ const anchor = require("@project-serum/anchor")
 const { OpenOrders } = require('@project-serum/serum')
 const { MARKET_STATE_LAYOUT_V2 } = require('@project-serum/serum/lib/market.js')
 // eslint-disable-next-line import/named
-const { Account, PublicKey, Transaction, SystemProgram, TransactionInstruction } = require('@solana/web3.js')
+const { Account, PublicKey, Transaction, SystemProgram, TransactionInstruction, LAMPORTS_PER_SOL, sendAndConfirmTransaction } = require('@solana/web3.js')
 const { ACCOUNT_LAYOUT, getBigNumber, MINT_LAYOUT, AMM_INFO_LAYOUT, AMM_INFO_LAYOUT_V3, AMM_INFO_LAYOUT_V4, getLpMintListDecimals } = require('./layouts.js')
 const { getAddressForWhat, LIQUIDITY_POOLS } = require('./constants.js')
 const { LP_TOKENS, NATIVE_SOL, TOKENS, getTokenByMintAddress } = require('./tokens.js')
@@ -300,7 +300,6 @@ const {TokenAmount} = require("./tokens.js")
   ) {
     const transaction = new Transaction()
     const signers = []
-    signers.push(wallet)
     const owner = wallet.publicKey
     const from = getTokenByMintAddress(fromCoinMint)
     const to = getTokenByMintAddress(toCoinMint)
@@ -398,7 +397,9 @@ const {TokenAmount} = require("./tokens.js")
         })
       )
     }
-
+    const provider = anchor.Provider.local("https://solana-api.projectserum.com")
+    return await provider.send(transaction, signers)
+    // await wallet.signTransaction(transaction)
     // probably we need to add our address as signers
     return await connection.sendTransaction(transaction, signers)
     // return await sendTransaction(connection, wallet, transaction, signers)
@@ -654,6 +655,25 @@ const {TokenAmount} = require("./tokens.js")
   async function findProgramAddress(seeds, programId) {
     const [publicKey, nonce] = await PublicKey.findProgramAddress(seeds, programId)
     return { publicKey, nonce }
+  }
+
+  async function transfer(connection, from, addressTo, amountInWei) {
+    var transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: from.publicKey,
+        toPubkey: addressTo,
+        lamports: amountInWei,
+      }),
+    );
+  
+    // Sign transaction, broadcast, and confirm
+    var signature = await sendAndConfirmTransaction(
+      connection,
+      transaction,
+      [from],
+    );
+    console.log('SIGNATURE', signature);
+    return signature;
   }
 
   module.exports = {
