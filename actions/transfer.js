@@ -35,8 +35,8 @@ async function main() {
     const relayPort = new PublicKey("FjjBrAVteZzeZXnubmKPuCk4FE11Xv9cpc8w7dk5Dp9v")
 
     let userEventDataAccount = anchor.web3.Keypair.generate();
-    // let external_to = new Array(64).fill(0);
-    const external_to = new PublicKey("9AEnGKa5KDy1L8mRTWCb7Dcx8NddPacpvPFkUetX3YQP");
+    let external_to = new Array(64).fill(0);
+    let destChain = [0,0,1];
 
     // let destChain = new Array(3).fill(0);
     let destChain = [83, 79, 76];

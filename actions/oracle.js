@@ -12,7 +12,8 @@ const ammId = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
 const baseMint = "11111111111111111111111111111111"; // from token address in string representattion
 const quoteMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // = to token address in string representattion
 const fromCoinAmount = "10000"; // string amount with all decimals (6 default)
-const baseUrl = "http://ec2-3-9-18-254.eu-west-2.compute.amazonaws.com:30254/"
+const baseUrl = process.env.EXTRACTOR_URL;
+console.log(baseUrl);
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
