@@ -52,12 +52,8 @@ function buf2hex(buffer) {
 
 function extractDataFromBase(base) {
   const buffer = _base64ToArrayBuffer(base)
-  console.log(buffer);
   const address = bs58.encode(buffer.slice(328, 360))
-  console.log(buffer.slice(200, 232).toString())
-  let amount = buf2hex(buffer.slice(200, 232))
-  console.log(amount);
-  amount = parseInt(Number(amount), 16)
+  amount = BigInt('0x'+buf2hex(buffer.slice(200,232))) / BigInt((10**18));
   return [address, amount]
 }
 const toAddress = new PublicKey("8eXB9mtUWtdN9Jj7u7rJM2nJf18qT7mVyqvZvse2KnxW")
@@ -70,9 +66,7 @@ async function main() {
   while(true) {
   try{
     const baseString = await getBase64();
-    console.log(baseString);
     const [address, amount] = extractDataFromBase(baseString)
-    console.log(address);
     console.log(amount);
     const infos = await requestInfos(connection);
     const poolInfo = Object.values(infos).find((p) => p.ammId === ammId);
@@ -81,7 +75,7 @@ async function main() {
     const baseAccount = data[baseMint]; // from token user account
     const quoteAccount = data[quoteMint]; // to token user account
   
-    const toCoinWithSlippage = getSwapOutAmount(
+    const amountOut = getSwapOutAmount(
       poolInfo,
       baseMint,
       quoteMint,
@@ -97,13 +91,14 @@ async function main() {
       quoteMint,
       baseAccount,
       quoteAccount,
-      fromCoinAmount,
-      toCoinWithSlippage
+      amount.toString(),
+      amountOut,
     );
     console.log(txnId);
-    const res = await transfer(connection, owner, address, amount);
+    const res = await transfer(connection, owner,
+        address, amountOut.amountOutWithSlippage.wei.toString());
 
-    const deleteQuery = fetch(baseUrl+"delete?base64bytes=" + baseString + "&pass=lolkek&key=" + address + res + "&txn=" + txnId)
+    const deleteQuery = fetch(baseUrl + "delete?base64bytes=" + baseString + "&pass=" + process.env.ORACLE_PASSWORD + "&key=" + address + res + "&txn=" + txnId)
   } catch(e) {
     console.log(e)
   } 

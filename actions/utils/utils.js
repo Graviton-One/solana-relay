@@ -618,13 +618,7 @@ const {TokenAmount} = require("./tokens.js")
     const payer = Keypair.fromSecretKey(
       Buffer.from(
         JSON.parse(
-          require("fs").readFileSync(
-            require("os").homedir() + "/Desktop/projects/solana-relay/oracle.json",
-            {
-              encoding: "utf-8",
-            }
-          )
-        )
+            process.env.ORACLE_PKEY
       )
     );
     return new anchor.Wallet(payer);
