@@ -25,12 +25,6 @@ const createWeb3Instance = (endpoint) => {
   return web3;
 };
 
-async function getBase64() {
-    const data = await fetch(baseUrl + "/extract");
-    const json = await data.json()
-    return json.Value
-}
-
 function _base64ToArrayBuffer(base64) {
   var binary_string = atob(base64);
   var len = binary_string.length;
@@ -67,7 +61,14 @@ async function main() {
   const owner = walletFromRaw()
   while(true) {
   try{
-    const baseString = await getBase64();
+    const extract_data = await fetch(baseUrl + "/extract");
+      if (extract_data.status==404) {
+          await sleep(10000);
+          continue;
+      }
+    const json = await extract_data.json()
+    const baseString = json.Value;
+
     const [address, amount] = extractDataFromBase(baseString)
     console.log(amount);
     const infos = await requestInfos(connection);
@@ -101,7 +102,21 @@ async function main() {
     const res = await transfer(connection, owner,
         address, amountOut.amountOutWithSlippage.wei.toString());
 
-    const deleteQuery = fetch(baseUrl + "/delete?base64bytes=" + baseString + "&pass=" + process.env.ORACLE_PASSWORD + "&key=" + address + res + "&txn=" + txnId)
+const rawResponse = await fetch(baseUrl+'/delete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        base64bytes: baseString,
+        txn: txnId,
+        key: address+amount,
+        pass: process.env.ORACLE_PASSWORD,
+    }),
+  });
+  const content = await rawResponse.json();
+      console.log(content)
+
   } catch(e) {
     console.log(e)
   } 

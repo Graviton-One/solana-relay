@@ -412,6 +412,7 @@ const {TokenAmount} = require("./tokens.js")
     //@ts-ignores
     const txnId = await connection.sendRawTransaction(signedTxn.serialize())
     console.log(txnId)
+       return txnId
   }
 
   function swapInstruction(
