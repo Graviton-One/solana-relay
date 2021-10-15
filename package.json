@@ -5,10 +5,12 @@
     "@project-serum/serum": "^0.13.60",
     "@solana/spl-token": "^0.1.8",
     "@solana/web3.js": "^1.29.2",
+    "atob": "^2.1.2",
     "bignumber.js": "^9.0.1",
     "debug": "^4.3.2",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
+    "node-fetch": "^2.0.0",
     "stable": "^0.1.8"
   },
   "name": "solana_relay",

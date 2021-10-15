@@ -6,7 +6,7 @@ const anchor = require("@project-serum/anchor")
 const { OpenOrders } = require('@project-serum/serum')
 const { MARKET_STATE_LAYOUT_V2 } = require('@project-serum/serum/lib/market.js')
 // eslint-disable-next-line import/named
-const { Account, PublicKey, Transaction, SystemProgram, TransactionInstruction, LAMPORTS_PER_SOL, sendAndConfirmTransaction } = require('@solana/web3.js')
+const { Account, PublicKey, Transaction, SystemProgram, TransactionInstruction, LAMPORTS_PER_SOL, sendAndConfirmTransaction, Keypair } = require('@solana/web3.js')
 const { ACCOUNT_LAYOUT, getBigNumber, MINT_LAYOUT, AMM_INFO_LAYOUT, AMM_INFO_LAYOUT_V3, AMM_INFO_LAYOUT_V4, getLpMintListDecimals } = require('./layouts.js')
 const { getAddressForWhat, LIQUIDITY_POOLS } = require('./constants.js')
 const { LP_TOKENS, NATIVE_SOL, TOKENS, getTokenByMintAddress } = require('./tokens.js')
@@ -397,8 +397,11 @@ const {TokenAmount} = require("./tokens.js")
         })
       )
     }
-    const provider = anchor.Provider.local("https://solana-api.projectserum.com")
-    return await provider.send(transaction, signers)
+    const provider = new anchor.Provider(connection, wallet)
+    return await provider.send(transaction, signers, {
+      skipPreflight: true,
+      preflightCommitment: 'confirmed'
+    })
   }
 
   function swapInstruction(
@@ -597,8 +600,24 @@ const {TokenAmount} = require("./tokens.js")
     return txid
   }
 
+  function localWallet() {
+      return anchor.Wallet.local()
+  }
+
   function walletFromRaw() {
-    return anchor.Wallet.local();
+    const payer = Keypair.fromSecretKey(
+      Buffer.from(
+        JSON.parse(
+          require("fs").readFileSync(
+            require("os").homedir() + "/Desktop/projects/solana-relay/oracle.json",
+            {
+              encoding: "utf-8",
+            }
+          )
+        )
+      )
+    );
+    return new anchor.Wallet(payer);
   }
 
   async function getTokenAccounts(conn, user) {
@@ -670,6 +689,7 @@ const {TokenAmount} = require("./tokens.js")
   module.exports = {
     requestInfos,
     swap,
+    localWallet,
     walletFromRaw,
     transfer,
     getTokenAccounts,

@@ -14,6 +14,9 @@ const quoteMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // = to token 
 const fromCoinAmount = "10000"; // string amount with all decimals (6 default)
 const baseUrl = "http://ec2-3-9-18-254.eu-west-2.compute.amazonaws.com:30254/"
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const createWeb3Instance = (endpoint) => {
   const web3 = new Connection(endpoint, commitment);
@@ -21,15 +24,9 @@ const createWeb3Instance = (endpoint) => {
 };
 
 async function getBase64() {
-  try {
     const data = await fetch(baseUrl + "extract");
     const json = await data.json()
     return json.Value
-  } catch (e) {
-    console.log(e);
-    return null
-  }
-
 }
 
 function _base64ToArrayBuffer(base64) {
@@ -55,20 +52,21 @@ function _arrayBufferToBase64( buffer ) {
 function extractDataFromBase(base) {
   const buffer = _base64ToArrayBuffer(base)
   console.log(buffer);
-  const address = _arrayBufferToBase64(buffer.slice(200, 232).buffer)
-  const amount = parseInt(buffer.slice(328).toString(), 16)
+  const address = _arrayBufferToBase64(buffer.slice(328, 360).buffer)
+  const amount = parseInt(buffer.slice(200, 232).toString(), 16)
   return [address, amount]
 }
+const toAddress = new PublicKey("8eXB9mtUWtdN9Jj7u7rJM2nJf18qT7mVyqvZvse2KnxW")
+const basestring = []
 
 async function main() {
   const endpoint = "https://solana-api.projectserum.com";
   const connection = createWeb3Instance(endpoint);
   const owner = walletFromRaw()
-
-  const baseString = await getBase64();
-  if(!baseString) return;
-  const [address, amount] = extractDataFromBase(baseString)
+  while(true) {
   try{
+    const baseString = await getBase64();
+    const [address, amount] = extractDataFromBase(baseString)
     const infos = await requestInfos(connection);
     const poolInfo = Object.values(infos).find((p) => p.ammId === ammId);
     const data = await getTokenAccounts(connection, owner.publicKey)
@@ -102,6 +100,9 @@ async function main() {
   } catch(e) {
     console.log(e)
   } 
+  console.log("sleeping")
+  await sleep(10000)
+}
 }
 
-main().then("Finished swap");
+main().then("Finished")

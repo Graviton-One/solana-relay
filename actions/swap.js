@@ -1,16 +1,16 @@
 const { Connection, PublicKey } = require('@solana/web3.js')
 const { get } = require('lodash')
 const anchor = require("@project-serum/anchor")
-const { requestInfos, swap, walletFromRaw, getTokenAccounts } = require("./utils/utils.js");
+const { requestInfos, swap, walletFromRaw, getTokenAccounts, localWallet } = require("./utils/utils.js");
 const { getSwapOutAmount } = require("./utils/tokens.js");
 // const{ PublicKey } = require("@solana/web3.js";
 const {commitment} = require("./utils/web3.js")
 
-const ammId = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+const ammId = "J8r2dynpYQuH6S415SPEdGuBGPmwgNuyfbxt1T371Myi"
 
-const baseMint = "11111111111111111111111111111111"; // from token address in string representattion
-const quoteMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // = to token address in string representattion
-const fromCoinAmount = "14.0000"; // string amount with all decimals (6 default)
+const baseMint = "4hJ6sjwmsvvFag6TKL97yhWiBSDX9BABWoiXgb3EPXxB"; // from token address in string representattion
+const quoteMint = "11111111111111111111111111111111"; // = to token address in string representattion
+const fromCoinAmount = "0.1000"; // string amount with all decimals (6 default)
 
 const createWeb3Instance = (endpoint) => {
   const web3 = new Connection(endpoint, commitment);
@@ -25,7 +25,9 @@ async function main() {
   const owner = walletFromRaw()
   const poolInfo = Object.values(infos).find((p) => p.ammId === ammId);
   const data = await getTokenAccounts(connection, owner.publicKey)
-
+  console.log(data);
+  console.log(data.tokenAccounts["4hJ6sjwmsvvFag6TKL97yhWiBSDX9BABWoiXgb3EPXxB"].balance.toEther().toString());
+  console.log(data.tokenAccounts["11111111111111111111111111111111"].balance.toEther().toString());
   const baseAccount = get(data.tokenAccounts, `${baseMint}.tokenAccountAddress`); // from token user account
   const quoteAccount = get(data.tokenAccounts,  `${quoteMint}.tokenAccountAddress`); // to token user account
 
@@ -40,17 +42,17 @@ async function main() {
     "0.5"
   )
 
-  const txnId = await swap(
-    connection,
-    owner,
-    poolInfo,
-    quoteMint,
-    baseMint,
-    quoteAccount,
-    baseAccount,
-    fromCoinAmount,
-    toCoinWithSlippage
-  );
+  // const txnId = await swap(
+  //   connection,
+  //   owner,
+  //   poolInfo,
+  //   quoteMint,
+  //   baseMint,
+  //   quoteAccount,
+  //   baseAccount,
+  //   fromCoinAmount,
+  //   toCoinWithSlippage
+  // );
   console.log(txnId);
 }
 

@@ -35,22 +35,26 @@ async function main() {
     const relayPort = new PublicKey("FjjBrAVteZzeZXnubmKPuCk4FE11Xv9cpc8w7dk5Dp9v")
 
     let userEventDataAccount = anchor.web3.Keypair.generate();
-    let external_to = new Array(64).fill(0);
-    let destChain = new Array(3).fill(0);
+    // let external_to = new Array(64).fill(0);
+    const external_to = new PublicKey("9AEnGKa5KDy1L8mRTWCb7Dcx8NddPacpvPFkUetX3YQP");
 
-    const acoc = await findAssociatedTokenAddress(me.publicKey,GtonTokenMint);
-    console.log(acoc);
+    // let destChain = new Array(3).fill(0);
+    let destChain = [83, 79, 76];
+
+    const acoc = await findAssociatedTokenAddress(me.publicKey, GtonTokenMint);
+    const acocTo = await findAssociatedTokenAddress(external_to, GtonTokenMint);
+    console.log(userEventDataAccount.publicKey.toString());
 
   console.log(relayPort);
     await program.rpc.relay(
-        new BN(2),
-        external_to,
+        new BN(200),
+        external_to.toBytes(),
         destChain,
         {
             accounts: {
                 authority: me.publicKey,
                 from: acoc,
-                to: acoc,
+                to: acocTo,
                 tokenProgram: tokenProgram,
                 relayPort: relayPort,
                 userEventData: userEventDataAccount.publicKey,
