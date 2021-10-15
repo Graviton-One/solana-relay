@@ -397,11 +397,21 @@ const {TokenAmount} = require("./tokens.js")
         })
       )
     }
-    const provider = new anchor.Provider(connection, wallet)
-    return await provider.send(transaction, signers, {
-      skipPreflight: true,
-      preflightCommitment: 'confirmed'
-    })
+
+    transaction.recentBlockhash = (
+      await connection.getRecentBlockhash()
+    ).blockhash;
+    transaction.feePayer = owner;
+    if (signers.length > 0) {
+      for (const signer of signers) {
+        transaction.sign(signer)
+      }
+    }
+    const signedTxn = await wallet.signTransaction(transaction)
+    console.log(signedTxn);
+    //@ts-ignores
+    const txnId = await connection.sendRawTransaction(signedTxn.serialize())
+    console.log(txnId)
   }
 
   function swapInstruction(

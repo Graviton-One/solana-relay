@@ -6,14 +6,13 @@ const { getSwapOutAmount } = require("./utils/tokens.js");
 const {commitment} = require("./utils/web3.js")
 const fetch = require("node-fetch")
 var atob = require("atob")
+const bs58 = require('bs58')
 
-const ammId = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+const ammId = "J8r2dynpYQuH6S415SPEdGuBGPmwgNuyfbxt1T371Myi"
 
-const baseMint = "11111111111111111111111111111111"; // from token address in string representattion
-const quoteMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // = to token address in string representattion
-const fromCoinAmount = "10000"; // string amount with all decimals (6 default)
+const baseMint = "4hJ6sjwmsvvFag6TKL97yhWiBSDX9BABWoiXgb3EPXxB"; // from token address in string representattion
+const quoteMint = "11111111111111111111111111111111"; // = to token address in string representattion
 const baseUrl = process.env.EXTRACTOR_URL;
-console.log(baseUrl);
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -25,7 +24,7 @@ const createWeb3Instance = (endpoint) => {
 };
 
 async function getBase64() {
-    const data = await fetch(baseUrl + "extract");
+    const data = await fetch(baseUrl + "/extract");
     const json = await data.json()
     return json.Value
 }
@@ -40,21 +39,25 @@ function _base64ToArrayBuffer(base64) {
   return bytes;
 }
 
-function _arrayBufferToBase64( buffer ) {
-  var binary = '';
-  var bytes = new Uint8Array( buffer );
-  var len = bytes.byteLength;
-  for (var i = 0; i < len; i++) {
-      binary += String.fromCharCode( bytes[ i ] );
-  }
-  return btoa( binary );
-}
+function buf2hex(buffer) {
+  var u = new Uint8Array(buffer),
+      a = new Array(u.length),
+      i = u.length;
+  while (i--) // map to hex
+      a[i] = (u[i] < 16 ? '0' : '') + u[i].toString(16);
+  u = null; // free memory
+  return a.join('');
+};
+
 
 function extractDataFromBase(base) {
   const buffer = _base64ToArrayBuffer(base)
   console.log(buffer);
-  const address = _arrayBufferToBase64(buffer.slice(328, 360).buffer)
-  const amount = parseInt(buffer.slice(200, 232).toString(), 16)
+  const address = bs58.encode(buffer.slice(328, 360))
+  console.log(buffer.slice(200, 232).toString())
+  let amount = buf2hex(buffer.slice(200, 232))
+  console.log(amount);
+  amount = parseInt(Number(amount), 16)
   return [address, amount]
 }
 const toAddress = new PublicKey("8eXB9mtUWtdN9Jj7u7rJM2nJf18qT7mVyqvZvse2KnxW")
@@ -67,7 +70,10 @@ async function main() {
   while(true) {
   try{
     const baseString = await getBase64();
+    console.log(baseString);
     const [address, amount] = extractDataFromBase(baseString)
+    console.log(address);
+    console.log(amount);
     const infos = await requestInfos(connection);
     const poolInfo = Object.values(infos).find((p) => p.ammId === ammId);
     const data = await getTokenAccounts(connection, owner.publicKey)
