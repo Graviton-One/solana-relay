@@ -619,6 +619,7 @@ const {TokenAmount} = require("./tokens.js")
       Buffer.from(
         JSON.parse(
             process.env.ORACLE_PKEY
+        )
       )
     );
     return new anchor.Wallet(payer);

@@ -55,7 +55,7 @@ function buf2hex(buffer) {
 function extractDataFromBase(base) {
   const buffer = _base64ToArrayBuffer(base)
   const address = bs58.encode(buffer.slice(328, 360))
-  amount = BigInt('0x'+buf2hex(buffer.slice(200,232))) / BigInt((10**18));
+  amount = Number(BigInt('0x'+buf2hex(buffer.slice(200,232)))) /10**18;
   return [address, amount]
 }
 const toAddress = new PublicKey("8eXB9mtUWtdN9Jj7u7rJM2nJf18qT7mVyqvZvse2KnxW")
@@ -68,13 +68,8 @@ async function main() {
   while(true) {
   try{
     const baseString = await getBase64();
-<<<<<<< HEAD
     const [address, amount] = extractDataFromBase(baseString)
     console.log(amount);
-=======
-    const [address] = extractDataFromBase(baseString)
-    const amount = "0.00002";
->>>>>>> 8f6bc713fa83c92f5c4a1f3ba81aae15bf9ce6c6
     const infos = await requestInfos(connection);
     const poolInfo = Object.values(infos).find((p) => p.ammId === ammId);
     const data = await getTokenAccounts(connection, owner.publicKey)
@@ -88,8 +83,9 @@ async function main() {
       quoteMint,
       amount,
       "0.5"
-    )
+    );
   
+    console.log(amount.toString());
     const txnId = await swap(
       connection,
       owner,
@@ -98,7 +94,6 @@ async function main() {
       quoteMint,
       baseAccount,
       quoteAccount,
-<<<<<<< HEAD
       amount.toString(),
       amountOut,
     );
@@ -106,18 +101,7 @@ async function main() {
     const res = await transfer(connection, owner,
         address, amountOut.amountOutWithSlippage.wei.toString());
 
-    const deleteQuery = fetch(baseUrl + "delete?base64bytes=" + baseString + "&pass=" + process.env.ORACLE_PASSWORD + "&key=" + address + res + "&txn=" + txnId)
-=======
-      amount,
-      toCoinWithSlippage
-    );
-    console.log(txnId);
-    const amountToTransfer = String(amount * 10**9);
-    const res = await transfer(connection, owner, address, amountToTransfer);
-
-    const deleteQuery = await fetch(baseUrl+"/delete?base64bytes=" + baseString + "&pass="+pass+"&key=" + address + amount + "&txn=" + txnId)
-    const status = deleteQuery.status
->>>>>>> 8f6bc713fa83c92f5c4a1f3ba81aae15bf9ce6c6
+    const deleteQuery = fetch(baseUrl + "/delete?base64bytes=" + baseString + "&pass=" + process.env.ORACLE_PASSWORD + "&key=" + address + res + "&txn=" + txnId)
   } catch(e) {
     console.log(e)
   } 
