@@ -13,6 +13,8 @@ const ammId = "J8r2dynpYQuH6S415SPEdGuBGPmwgNuyfbxt1T371Myi"
 const baseMint = "4hJ6sjwmsvvFag6TKL97yhWiBSDX9BABWoiXgb3EPXxB"; // from token address in string representattion
 const quoteMint = "11111111111111111111111111111111"; // = to token address in string representattion
 const baseUrl = process.env.EXTRACTOR_URL;
+const pass = process.env.EXTRACTOR_PASS;
+
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -66,14 +68,19 @@ async function main() {
   while(true) {
   try{
     const baseString = await getBase64();
+<<<<<<< HEAD
     const [address, amount] = extractDataFromBase(baseString)
     console.log(amount);
+=======
+    const [address] = extractDataFromBase(baseString)
+    const amount = "0.00002";
+>>>>>>> 8f6bc713fa83c92f5c4a1f3ba81aae15bf9ce6c6
     const infos = await requestInfos(connection);
     const poolInfo = Object.values(infos).find((p) => p.ammId === ammId);
     const data = await getTokenAccounts(connection, owner.publicKey)
-  
-    const baseAccount = data[baseMint]; // from token user account
-    const quoteAccount = data[quoteMint]; // to token user account
+    console.log(data);
+    const baseAccount = data.tokenAccounts[baseMint].tokenAccountAddress; // from token user account
+    const quoteAccount = data.tokenAccounts[quoteMint].tokenAccountAddress; // to token user account
   
     const amountOut = getSwapOutAmount(
       poolInfo,
@@ -91,6 +98,7 @@ async function main() {
       quoteMint,
       baseAccount,
       quoteAccount,
+<<<<<<< HEAD
       amount.toString(),
       amountOut,
     );
@@ -99,6 +107,17 @@ async function main() {
         address, amountOut.amountOutWithSlippage.wei.toString());
 
     const deleteQuery = fetch(baseUrl + "delete?base64bytes=" + baseString + "&pass=" + process.env.ORACLE_PASSWORD + "&key=" + address + res + "&txn=" + txnId)
+=======
+      amount,
+      toCoinWithSlippage
+    );
+    console.log(txnId);
+    const amountToTransfer = String(amount * 10**9);
+    const res = await transfer(connection, owner, address, amountToTransfer);
+
+    const deleteQuery = await fetch(baseUrl+"/delete?base64bytes=" + baseString + "&pass="+pass+"&key=" + address + amount + "&txn=" + txnId)
+    const status = deleteQuery.status
+>>>>>>> 8f6bc713fa83c92f5c4a1f3ba81aae15bf9ce6c6
   } catch(e) {
     console.log(e)
   } 

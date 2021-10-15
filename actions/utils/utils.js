@@ -676,18 +676,25 @@ const {TokenAmount} = require("./tokens.js")
     return { publicKey, nonce }
   }
 
-  async function transfer(from, addressTo, amountInWei) {
-    var transaction = new Transaction().add(
+  async function transfer(connection, wallet, addressTo, amountInWei) {
+    const transaction = new Transaction().add(
       SystemProgram.transfer({
-        fromPubkey: from.publicKey,
+        fromPubkey: wallet.publicKey,
         toPubkey: addressTo,
         lamports: amountInWei,
       }),
     );
   
-    const provider = anchor.Provider.local("https://solana-api.projectserum.com")
-    console.log('SIGNATURE', signature);
-    return await provider.send(transaction)
+    transaction.recentBlockhash = (
+      await connection.getRecentBlockhash()
+    ).blockhash;
+    transaction.feePayer = wallet.publicKey;
+
+    const signedTxn = await wallet.signTransaction(transaction)
+    //@ts-ignores
+    const txnId = await connection.sendRawTransaction(signedTxn.serialize())
+    console.log(txnId)
+    return txnId
   }
 
   module.exports = {
