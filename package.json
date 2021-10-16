@@ -9,7 +9,6 @@
     "bignumber.js": "^9.0.1",
     "bs58": "^4.0.1",
     "debug": "^4.3.2",
-    "husky": "^7.0.2",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "node-fetch": "^2.0.0",
@@ -23,7 +22,8 @@
   },
   "scripts": {
     "test": "node tests/relay.js",
-    "prettier": "prettier --write ./tests/* ./actions/*"
+    "prettier": "prettier --write ./tests/* ./actions/*",
+    "prepare": "husky install"
   },
   "husky": {
     "hooks": {
@@ -40,5 +40,8 @@
     "url": "https://github.com/Graviton-One/solana-sc/issues"
   },
   "homepage": "https://github.com/Graviton-One/solana-sc#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "husky": "^7.0.2"
+  }
 }

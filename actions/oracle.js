@@ -22,7 +22,7 @@ const baseUrl = process.env.EXTRACTOR_URL;
 const pass = process.env.EXTRACTOR_PASS;
 
 function sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const createWeb3Instance = (endpoint) => {
