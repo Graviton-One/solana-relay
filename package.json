@@ -21,7 +21,14 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "node tests/relay.js"
+    "test": "node tests/relay.js",
+    "prettier": "prettier --write ./tests/* ./actions/*",
+    "prepare": "husky install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "prettier"
+    }
   },
   "repository": {
     "type": "git",
@@ -33,5 +40,8 @@
     "url": "https://github.com/Graviton-One/solana-sc/issues"
   },
   "homepage": "https://github.com/Graviton-One/solana-sc#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "husky": "^7.0.2"
+  }
 }

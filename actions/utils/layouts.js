@@ -1,11 +1,17 @@
-const { bool, publicKey, struct, u32, u64, u128, u8 } = require("@project-serum/borsh");
-const { PublicKey } = require("@solana/web3.js");
-const { LP_TOKENS} = require('./tokens.js');
 const {
-  commitment, getMultipleAccounts, 
-} = require('./web3.js');
+  bool,
+  publicKey,
+  struct,
+  u32,
+  u64,
+  u128,
+  u8,
+} = require("@project-serum/borsh");
+const { PublicKey } = require("@solana/web3.js");
+const { LP_TOKENS } = require("./tokens.js");
+const { commitment, getMultipleAccounts } = require("./web3.js");
 
- const MINT_LAYOUT = struct([
+const MINT_LAYOUT = struct([
   u32("mintAuthorityOption"),
   publicKey("mintAuthority"),
   u64("supply"),
@@ -15,7 +21,7 @@ const {
   publicKey("freezeAuthority"),
 ]);
 
- const AMM_INFO_LAYOUT = struct([
+const AMM_INFO_LAYOUT = struct([
   u64("status"),
   u64("nonce"),
   u64("orderNum"),
@@ -54,7 +60,7 @@ const {
   publicKey("pnlOwner"),
 ]);
 
- const AMM_INFO_LAYOUT_V3 = struct([
+const AMM_INFO_LAYOUT_V3 = struct([
   u64("status"),
   u64("nonce"),
   u64("orderNum"),
@@ -97,7 +103,7 @@ const {
   publicKey("srmTokenAccount"),
 ]);
 
- const AMM_INFO_LAYOUT_V4 = struct([
+const AMM_INFO_LAYOUT_V4 = struct([
   u64("status"),
   u64("nonce"),
   u64("orderNum"),
@@ -152,7 +158,7 @@ const {
   publicKey("pnlOwner"),
 ]);
 
- async function getLpMintListDecimals(conn, mintAddressInfos) {
+async function getLpMintListDecimals(conn, mintAddressInfos) {
   const reLpInfoDict = {};
   const mintList = [];
   mintAddressInfos.forEach((item) => {
@@ -187,11 +193,11 @@ const {
   return reInfo;
 }
 
- function getBigNumber(num) {
+function getBigNumber(num) {
   return num === undefined || num === null ? 0 : parseFloat(num.toString());
 }
 
- const ACCOUNT_LAYOUT = struct([
+const ACCOUNT_LAYOUT = struct([
   publicKey("mint"),
   publicKey("owner"),
   u64("amount"),
@@ -212,5 +218,5 @@ module.exports = {
   AMM_INFO_LAYOUT_V4,
   AMM_INFO_LAYOUT_V3,
   AMM_INFO_LAYOUT,
-  MINT_LAYOUT
-}
+  MINT_LAYOUT,
+};
