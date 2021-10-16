@@ -21,7 +21,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "node tests/relay.js"
+    "test": "node tests/relay.js",
+    "prettier": "prettier --write ./tests/* ./actions/*"
   },
   "repository": {
     "type": "git",
